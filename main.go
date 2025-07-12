@@ -1,19 +1,24 @@
-// package main
+package main
 
-// import (
-// 	"fmt"
-// 	"os"
-// )
+import (
+	"fmt"
 
-// // func main() {
-// // 	for i := 0; i < len(os.Args); i++ {
-// // 		fmt.Println(i, os.Args[i])
-// // 	}
-// // 	if len(os.Args) < 2 {
-// // 		fmt.Println("Please provide an argument")
-// // 		return
-// // 	}
+	"github.com/InbaRajashankar/gobudget/utils"
+)
 
-// // 	input := os.Args[1]
-// // 	fmt.Println("You entered: ", input)
-// // }
+func main() {
+	// args := make(map[string]string)
+	// args["-n"] = "2"
+	// // rows := backend.SelectAll()
+	// rows := backend.SelectFilter(args)
+	// backend.PrintRows(rows)
+
+	var test_dates = [6]string{"2/2", "0/23/4", "1/244/4", "3/4/51", "2/-2/2314", "-2/4/2"}
+
+	for i, _ := range test_dates {
+		_, err := utils.StringToDateValues(test_dates[i])
+		if err != nil {
+			fmt.Println(err)
+		}
+	}
+}
