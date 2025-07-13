@@ -42,7 +42,7 @@ func SelectFilter(args map[string]string) (*sql.Rows, error) {
 	conditions_applied := 0 // in case an AND is needed in between multiple BETWEEN statements
 
 	// filter by time
-	date_range, ok := args["-t"]
+	date_range, ok := args["-d"]
 	if ok {
 		suffix, err := DateRangeToQueryString(date_range)
 		if err != nil {
