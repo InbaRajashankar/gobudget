@@ -4,16 +4,33 @@ import (
 	"log"
 
 	"github.com/InbaRajashankar/gobudget/backend"
+	"github.com/InbaRajashankar/gobudget/utils"
 )
 
 func main() {
+	// DemoGrabsum()
+	utils.CreateTable("./test.db")
+}
+
+func DemoGrab() {
 	args := make(map[string]string)
 	args["-n"] = "20"
 	args["-p"] = "10,20"
 	args["-d"] = "2/12/2023,2/12/2023"
-	rows, err := backend.SelectFilter(args)
+	rows, err := backend.GrabFilter(args)
 	if err != nil {
 		log.Fatal(err)
 	}
 	backend.PrintRows(rows)
+}
+
+func DemoGrabsum() {
+	args := make(map[string]string)
+	args["-t"] = ""
+	args["-e"] = ""
+	rows, err := backend.Grabsum(args)
+	if err != nil {
+		log.Fatal(err)
+	}
+	backend.PrintGrabsumRows(rows, args)
 }
