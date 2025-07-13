@@ -54,15 +54,17 @@ func SelectFilter(args map[string]string) *sql.Rows {
 func PrintRows(rows *sql.Rows) {
 	for rows.Next() {
 		var id int
-		var date string
+		var day int
+		var month int
+		var year int
 		var name string
 		var price float64
 		var tag string
-		err := rows.Scan(&id, &date, &name, &price, &tag)
+		err := rows.Scan(&id, &day, &month, &year, &name, &price, &tag)
 		if err != nil {
 			log.Fatal(err)
 		}
-		log.Printf("%d %s %s %.2f %s", id, date, name, price, tag)
+		log.Printf("%d %d %d %d %s %.2f %s", id, day, month, year, name, price, tag)
 	}
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)

@@ -38,7 +38,7 @@ func AddEntry(day int, month int, year int, name string, price float64, tag stri
 	}
 	defer db.Close()
 	_, err = db.Exec(
-		"INSERT INTO expenses(unix_date, month_year, name, price, tag) VALUES(?, ?, ?, ?, ?, ?)",
+		"INSERT INTO expenses(day, month, year, name, price, tag) VALUES(?, ?, ?, ?, ?, ?)",
 		day, month, year, name, price, tag)
 	if err != nil {
 		log.Fatal(err)
