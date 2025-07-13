@@ -40,7 +40,7 @@ func DateRangeToQuerySuffix(range_str string) (string, error) {
 	}
 
 	// form query
-	query := " WHERE "
+	query := " WHERE ("
 	if d1 == d2 {
 		query += "year = " + strconv.Itoa(d1[2])
 		query += " AND month = " + strconv.Itoa(d1[0])
@@ -76,5 +76,6 @@ func DateRangeToQuerySuffix(range_str string) (string, error) {
 		query += " OR (month = " + strconv.Itoa(d2[0]) + " AND day <= " + strconv.Itoa(d2[1]) + ")))"
 	}
 
+	query += ")"
 	return query, nil
 }
