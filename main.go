@@ -4,11 +4,17 @@ import (
 	"log"
 
 	"github.com/InbaRajashankar/gobudget/backend"
+	"github.com/InbaRajashankar/gobudget/frontend"
 )
 
 func main() {
 	// DemoGrabsum()
-	DemoGrabsum()
+	// DemoGrabsum()
+	DemoFrontend()
+}
+
+func DemoFrontend() {
+	frontend.InteractionLoop()
 }
 
 func DemoGrab() {
