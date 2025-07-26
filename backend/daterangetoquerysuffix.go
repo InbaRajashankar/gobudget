@@ -11,9 +11,20 @@ import (
 // Changes a date range in the format M/D/Y,M/D/Y to an SQLite WHERE statement
 func DateRangeToQuerySuffix(range_str string) (string, error) {
 	// Process string into dates, validation
+	if range_str == "," {
+		return "", nil
+	}
+
 	times := strings.Split(range_str, ",")
-	if len(times) != 2 {
-		return "", errors.New("< 2 dates provided")
+	if len(times) != 2 { // invalid string
+		return "", errors.New("invalid date range")
+	}
+
+	if times[0] == "" {
+		times[0] = "1/1/0"
+	}
+	if times[1] == "" {
+		times[1] = "1/1/10000"
 	}
 
 	d1, err := utils.StringToDateValues(times[0])
@@ -32,7 +43,7 @@ func DateRangeToQuerySuffix(range_str string) (string, error) {
 		valid_range = true
 	} else if d1[2] == d2[2] && d1[0] <= d2[0] {
 		valid_range = true
-	} else if d1[1] <= d2[1] {
+	} else if d1[2] <= d2[2] {
 		valid_range = true
 	}
 	if !valid_range {
