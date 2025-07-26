@@ -33,16 +33,16 @@ func InteractionLoop() {
 			log.Fatal("help has not been implemented yet :p")
 		case "clear", "c":
 			log.Fatal("clear has not been implemented yet :p")
-		case "grab":
-			acceptable_args := []string{"-d", "-p", "-n", "-csv"}
-			args, err := CreateArgMap(command_arr, acceptable_args)
+		case "grab", "g":
+			err := HandleGrab(command_arr)
+			if err != nil {
+				log.Println(err)
+			}
+		case "grabsum", "gs":
+			err := HandleGrabsum(command_arr)
 			if err != nil {
 				fmt.Println(err.Error())
-			} else {
-				HandleGrab(args)
 			}
-		case "grabsum":
-			fmt.Println("grabsum")
 		case "graph":
 			fmt.Println("graph")
 		case "enter":
@@ -54,35 +54,68 @@ func InteractionLoop() {
 	}
 }
 
-// CreateArgMap creates a map storing [arg]value, only including specified flags
-func CreateArgMap(arr []string, acceptable_args []string) (map[string]string, error) {
+// HandleGrab is the handler if the command is "grab".
+func HandleGrab(arr []string) error {
+	// Create the map of arguments, only including args in acceptable_args
 	args := make(map[string]string)
+	acceptable_args := []string{"-d", "-p", "-n", "-csv"}
 	for ind, val := range arr {
 		if slices.Contains(acceptable_args, val) {
 			_, already_in_map := args[val]
 			if already_in_map {
-				return nil, errors.New("invalid input: duplicate tags")
+				return errors.New("invalid input: duplicate tags")
 			}
 			if ind+1 >= len(arr) {
-				return nil, errors.New("invalid input: no value for final arg")
+				return errors.New("invalid input: no value for final arg")
 			}
 			args[val] = arr[ind+1]
 		}
 	}
-	return args, nil
-}
 
-// HandleGrab is the handler if the command is "grab".
-func HandleGrab(args map[string]string) {
+	// Call the backend.
 	if len(args) == 0 {
 		rows := backend.GrabAll()
 		backend.PrintRows(rows)
 	} else {
 		rows, err := backend.GrabFilter(args)
 		if err != nil {
-			fmt.Println(err)
+			return err
 		} else {
 			backend.PrintRows(rows)
 		}
 	}
+
+	return nil
+}
+
+// HandleGrabsum is the handler if the command is "grabsum"
+func HandleGrabsum(arr []string) error {
+	// Create the map of arguments, only including args in acceptable_args
+	args := make(map[string]string)
+	acceptable_args := []string{"-i", "-e", "-t", "-m", "-y"}
+
+	if len(arr) < 2 {
+		return errors.New("no date range provided")
+	}
+	args["RANGE"] = arr[1]
+
+	for _, val := range arr {
+		if slices.Contains(acceptable_args, val) {
+			_, already_in_map := args[val]
+			if already_in_map {
+				return errors.New("invalid input: duplicate tags")
+			}
+			args[val] = ""
+		}
+	}
+
+	// Call backend.
+	rows, err := backend.Grabsum(args)
+	if err != nil {
+		return err
+	} else {
+		backend.PrintGrabsumRows(rows, args)
+	}
+
+	return nil
 }
