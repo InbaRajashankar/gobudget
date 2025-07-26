@@ -11,10 +11,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const db_path string = "./test.db"
-
 // GrabAll selects all entries from the db.
-func GrabAll() *sql.Rows {
+func GrabAll(db_path string) *sql.Rows {
 	db, err := sql.Open("sqlite3", db_path)
 	if err != nil {
 		log.Fatal(err)
@@ -30,7 +28,7 @@ func GrabAll() *sql.Rows {
 }
 
 // GrabFilter selects all items from the db with some filter.
-func GrabFilter(args map[string]string) (*sql.Rows, error) {
+func GrabFilter(db_path string, args map[string]string) (*sql.Rows, error) {
 	db, err := sql.Open("sqlite3", db_path)
 	if err != nil {
 		log.Fatal(err)

@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -12,7 +13,17 @@ import (
 	"github.com/InbaRajashankar/gobudget/backend"
 )
 
+type Config struct {
+	DbPath string `json:"db_path"`
+}
+
 func InteractionLoop() {
+	config, err := OpenConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	db_path := config.DbPath
+
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Welcome to gobudget! Enter h for help.")
 
@@ -34,12 +45,12 @@ func InteractionLoop() {
 		case "clear", "c":
 			log.Fatal("clear has not been implemented yet :p")
 		case "grab", "g":
-			err := HandleGrab(command_arr)
+			err := HandleGrab(db_path, command_arr)
 			if err != nil {
 				log.Println(err)
 			}
 		case "grabsum", "gs":
-			err := HandleGrabsum(command_arr)
+			err := HandleGrabsum(db_path, command_arr)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
@@ -54,8 +65,24 @@ func InteractionLoop() {
 	}
 }
 
+// OpenConfig opens the config.json file and returns a struct with the config info
+func OpenConfig() (Config, error) {
+	content, err := os.ReadFile("./config.json")
+	if err != nil {
+		return Config{}, errors.New("error opening config.json")
+	}
+
+	var config Config
+	err = json.Unmarshal(content, &config)
+	if err != nil {
+		return Config{}, errors.New("error unmarshalling config.json")
+	}
+
+	return config, nil
+}
+
 // HandleGrab is the handler if the command is "grab".
-func HandleGrab(arr []string) error {
+func HandleGrab(db_path string, arr []string) error {
 	// Create the map of arguments, only including args in acceptable_args
 	args := make(map[string]string)
 	acceptable_args := []string{"-d", "-p", "-n", "-csv"}
@@ -74,10 +101,10 @@ func HandleGrab(arr []string) error {
 
 	// Call the backend.
 	if len(args) == 0 {
-		rows := backend.GrabAll()
+		rows := backend.GrabAll(db_path)
 		backend.PrintRows(rows)
 	} else {
-		rows, err := backend.GrabFilter(args)
+		rows, err := backend.GrabFilter(db_path, args)
 		if err != nil {
 			return err
 		} else {
@@ -89,7 +116,7 @@ func HandleGrab(arr []string) error {
 }
 
 // HandleGrabsum is the handler if the command is "grabsum"
-func HandleGrabsum(arr []string) error {
+func HandleGrabsum(db_path string, arr []string) error {
 	// Create the map of arguments, only including args in acceptable_args
 	args := make(map[string]string)
 	acceptable_args := []string{"-i", "-e", "-t", "-m", "-y"}
@@ -110,7 +137,7 @@ func HandleGrabsum(arr []string) error {
 	}
 
 	// Call backend.
-	rows, err := backend.Grabsum(args)
+	rows, err := backend.Grabsum(db_path, args)
 	if err != nil {
 		return err
 	} else {

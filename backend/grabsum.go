@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func Grabsum(args map[string]string) (*sql.Rows, error) {
+func Grabsum(db_path string, args map[string]string) (*sql.Rows, error) {
 	db, err := sql.Open("sqlite3", db_path)
 	if err != nil {
 		log.Fatal(err)

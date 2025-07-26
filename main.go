@@ -22,7 +22,7 @@ func DemoGrab() {
 	args["-n"] = "20"
 	args["-p"] = "10,20"
 	args["-d"] = "2/12/2023,2/12/2023"
-	rows, err := backend.GrabFilter(args)
+	rows, err := backend.GrabFilter("./test.db", args)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -35,7 +35,7 @@ func DemoGrabsum() {
 	// args["-e"] = ""
 	// args["-t"] = ""
 	args["-m"] = ""
-	rows, err := backend.Grabsum(args)
+	rows, err := backend.Grabsum("./test.db", args)
 	if err != nil {
 		log.Fatal(err)
 	}
