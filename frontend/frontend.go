@@ -2,6 +2,7 @@ package frontend
 
 import (
 	"bufio"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -60,7 +61,10 @@ func InteractionLoop() {
 			fmt.Println("graph")
 		case "enter", "e":
 			fmt.Println("Entering enter mode...")
-			HandleEnter()
+			err := HandleEnter()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		default:
 			fmt.Println("Invalid command, please enter h for help.")
 		}
@@ -153,7 +157,7 @@ func HandleGrabsum(db_path string, arr []string) error {
 // HandleEnter is the handler of "enter"
 func HandleEnter() error {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("You are in enter mode. enter \"e\" to return, \"g\" for guided entry, or \"b\" for bulk entry")
+	fmt.Println("You are in enter mode. enter \"e\" to return, \"g\" for guided entry, \"b\" for bulk entry, or  \"c\" for csv entry")
 	for {
 		fmt.Print("e> ")
 		buffer, err := reader.ReadString('\n')
@@ -167,17 +171,29 @@ func HandleEnter() error {
 			fmt.Println("Exiting enter mode")
 			return nil
 		case "b": // bulk
-			fmt.Println("bulk")
-			HandleEnterBulk()
+			fmt.Println("Bulk Entry")
+			err = HandleEnterBulk()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		case "g": // guided
 			fmt.Println("Guided Entry")
-			HandleEnterGuided()
+			err = HandleEnterGuided()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
+		case "c": // from csv
+			fmt.Println("CSV Entry")
+			err = HandleEnterCSV()
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		}
 	}
 
 }
 
-// HandleEnterGuided is called by HandledEnter and handles guided entry of lineitems.
+// HandleEnterGuided is handles guided entry of lineitems, called by HandleEnter.
 func HandleEnterGuided() error {
 	reader := bufio.NewReader(os.Stdin)
 	// enter name
@@ -235,6 +251,7 @@ func HandleEnterGuided() error {
 	return nil
 }
 
+// HandleEnterGuided is handles bulk entry of lineitems, called by HandleEnter.
 func HandleEnterBulk() error {
 	fmt.Println("Enter entries in the following format: M/D/Y,Name,Price,Tag;M/D/Y,Name,Price,Tag;...")
 	reader := bufio.NewReader(os.Stdin)
@@ -274,5 +291,62 @@ func HandleEnterBulk() error {
 			fmt.Println("Entry cancelled.")
 		}
 	}
+	return nil
+}
+
+func HandleEnterCSV() error {
+	// prompt user for file name
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter CSV file name: ")
+	fname, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	fname = strings.ReplaceAll(fname, " ", "")
+	fname = strings.ReplaceAll(fname, "\n", "")
+	if !strings.HasSuffix(fname, ".csv") {
+		return fmt.Errorf("filename %s does not end in .csv", fname)
+	}
+	log.Println(fname)
+
+	// open file
+	file, err := os.Open(fname)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	csv_reader := csv.NewReader(file)
+
+	records, err := csv_reader.ReadAll()
+	if err != nil {
+		return err
+	}
+
+	// read contents, verify, make query
+	for _, record := range records {
+		date, err := utils.StringToDateValues(record[0])
+		if err != nil {
+			return err
+		}
+		price, err := strconv.ParseFloat(record[2], 64)
+		if err != nil {
+			return err
+		}
+
+		// confirm and insert into db
+		fmt.Printf("Enter y to confirm entry of %s [%d/%d/%d] %f %s: ", record[1], date[0], date[1], date[2], price, record[3])
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+		response = strings.ReplaceAll(response, " ", "")
+		response = strings.ReplaceAll(response, "\n", "")
+		if response == "y" {
+			utils.AddEntry(date[1], date[0], date[2], record[1], price, record[3])
+		} else {
+			fmt.Println("Entry cancelled.")
+		}
+	}
+
 	return nil
 }
