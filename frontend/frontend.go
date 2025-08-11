@@ -168,6 +168,7 @@ func HandleEnter() error {
 			return nil
 		case "b": // bulk
 			fmt.Println("bulk")
+			HandleEnterBulk()
 		case "g": // guided
 			fmt.Println("Guided Entry")
 			HandleEnterGuided()
@@ -231,5 +232,47 @@ func HandleEnterGuided() error {
 		return nil
 	}
 	fmt.Println("Entry cancelled.")
+	return nil
+}
+
+func HandleEnterBulk() error {
+	fmt.Println("Enter entries in the following format: M/D/Y,Name,Price,Tag;M/D/Y,Name,Price,Tag;...")
+	reader := bufio.NewReader(os.Stdin)
+	input, err := reader.ReadString('\n')
+	if err != nil {
+		return err
+	}
+	input = strings.ReplaceAll(input, " ", "")
+	input = strings.ReplaceAll(input, "\n", "")
+	lineitems := strings.Split(input, ";")
+	for _, lineitem := range lineitems {
+		// get values
+		vals := strings.Split(lineitem, ",")
+		if len(vals) != 4 {
+			return fmt.Errorf("invalid lineitem length %s", lineitem)
+		}
+		date, err := utils.StringToDateValues(vals[0])
+		if err != nil {
+			return err
+		}
+		price, err := strconv.ParseFloat(vals[2], 64)
+		if err != nil {
+			return err
+		}
+
+		// confirm and insert into db
+		fmt.Printf("Enter y to confirm entry of %s [%d/%d/%d] %f %s: ", vals[1], date[0], date[1], date[2], price, vals[3])
+		response, err := reader.ReadString('\n')
+		if err != nil {
+			return err
+		}
+		response = strings.ReplaceAll(response, " ", "")
+		response = strings.ReplaceAll(response, "\n", "")
+		if response == "y" {
+			utils.AddEntry(date[1], date[0], date[2], vals[1], price, vals[3])
+		} else {
+			fmt.Println("Entry cancelled.")
+		}
+	}
 	return nil
 }
