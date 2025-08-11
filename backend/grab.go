@@ -51,16 +51,16 @@ func GrabFilter(db_path string, args map[string]string) (*sql.Rows, error) {
 
 	// filter by price
 	price_range, ok := args["-p"]
-	price_arr := strings.Split(price_range, ",")
-	first_price, err := strconv.Atoi(price_arr[0])
-	if err != nil {
-		return nil, errors.New("invalid first price, cannot convert to integer")
-	}
-	second_price, err := strconv.Atoi(price_arr[1])
-	if err != nil {
-		return nil, errors.New("invalid second price, cannot convert to integer")
-	}
 	if ok {
+		price_arr := strings.Split(price_range, ",")
+		first_price, err := strconv.Atoi(price_arr[0])
+		if err != nil {
+			return nil, errors.New("invalid first price, cannot convert to integer")
+		}
+		second_price, err := strconv.Atoi(price_arr[1])
+		if err != nil {
+			return nil, errors.New("invalid second price, cannot convert to integer")
+		}
 		if len(price_arr) != 2 || first_price > second_price {
 			error_string := fmt.Sprintf("invalid price range %s %s", price_arr[0], price_arr[1])
 			return nil, errors.New(error_string)
