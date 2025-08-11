@@ -43,5 +43,5 @@ func AddEntry(day int, month int, year int, name string, price float64, tag stri
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println("New entry successfully")
+	log.Printf("%s [%d/%d/%d] %f %s entered successfully.", name, month, day, year, price, tag)
 }
