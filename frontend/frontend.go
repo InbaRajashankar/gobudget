@@ -53,12 +53,15 @@ func InteractionLoop() {
 				log.Println(err)
 			}
 		case "grabsum", "gs":
-			err := HandleGrabsum(db_path, command_arr)
+			err := HandleGrabsum(db_path, command_arr, false)
 			if err != nil {
 				fmt.Println(err.Error())
 			}
-		case "graph":
-			fmt.Println("graph")
+		case "graph", "gsg", "grabsumgraph":
+			err := HandleGrabsum(db_path, command_arr, true)
+			if err != nil {
+				fmt.Println(err.Error())
+			}
 		case "enter", "e":
 			fmt.Println("Entering enter mode...")
 			err := HandleEnter()
@@ -123,7 +126,7 @@ func HandleGrab(db_path string, arr []string) error {
 }
 
 // HandleGrabsum is the handler if the command is "grabsum"
-func HandleGrabsum(db_path string, arr []string) error {
+func HandleGrabsum(db_path string, arr []string, graph bool) error {
 	// Create the map of arguments, only including args in acceptable_args
 	args := make(map[string]string)
 	acceptable_args := []string{"-i", "-e", "-t", "-m", "-y"}
@@ -147,6 +150,8 @@ func HandleGrabsum(db_path string, arr []string) error {
 	rows, err := backend.Grabsum(db_path, args)
 	if err != nil {
 		return err
+	} else if graph {
+		backend.PlotSqlRows(rows, args)
 	} else {
 		backend.PrintGrabsumRows(rows, args)
 	}
