@@ -11,6 +11,13 @@ import (
 
 // PlotSqlRows creates a plot from a sql.rows, the output of a Grabsum call.
 func PlotSqlRows(rows *sql.Rows, args map[string]string) error {
+	vals_map, min_net, max_net := ProcessRowsForPlot(rows, args)
+	GeneratePlot(&vals_map, min_net, max_net)
+	return nil
+}
+
+// ProcessRowsForPlot processes the sql.Rows into a map storing the cat_name->net $ and min/max vals for net $.
+func ProcessRowsForPlot(rows *sql.Rows, args map[string]string) (map[string]float64, float64, float64) {
 	vals_map := make(map[string]float64) // map that stores the values
 	min_net := 0.0
 	max_net := 0.0
@@ -18,6 +25,7 @@ func PlotSqlRows(rows *sql.Rows, args map[string]string) error {
 	_, group_by_tag := args["-t"]
 	_, group_by_month := args["-m"]
 	_, group_by_year := args["-y"]
+
 	for rows.Next() {
 		var count int
 		var net float64
@@ -81,13 +89,11 @@ func PlotSqlRows(rows *sql.Rows, args map[string]string) error {
 	if err := rows.Err(); err != nil {
 		log.Fatal(err)
 	}
-
-	GeneratePlot(&vals_map, min_net, max_net)
-
-	return nil
+	return vals_map, min_net, max_net
 }
 
-func GeneratePlot(vals_map *map[string]float64, min_net float64, max_net float64) error {
+// GeneratePlot makes and prints the graph of the summed counts
+func GeneratePlot(vals_map *map[string]float64, min_net float64, max_net float64) {
 	range_of_xs := 50.0 // width of xs on the screen
 	net_range := max_net - min_net
 	below_zero_range_xs := 0
@@ -96,18 +102,16 @@ func GeneratePlot(vals_map *map[string]float64, min_net float64, max_net float64
 	}
 	var count_xs int
 	for key, val := range *vals_map {
-		if val < 0 {
+		if val < 0 { // negative values
 			count_xs = int(math.Round((-1 * val / net_range) * range_of_xs))
 			fmt.Printf("|%15s|%10.2f|", key, val)
 			fmt.Print(strings.Repeat(" ", below_zero_range_xs-count_xs+1))
 			fmt.Println("\033[35m" + strings.Repeat("x", count_xs) + "\033[0m|")
-		} else {
+		} else { // postive values
 			count_xs = int(math.Round((val / net_range) * range_of_xs))
 			fmt.Printf("|%15s|%10.2f|", key, val)
 			fmt.Print(strings.Repeat(" ", below_zero_range_xs+1) + "|")
 			fmt.Println("\033[36m" + strings.Repeat("x", count_xs) + "\033[0m")
 		}
 	}
-
-	return nil
 }
