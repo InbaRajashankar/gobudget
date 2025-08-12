@@ -92,7 +92,7 @@ func OpenConfig() (Config, error) {
 func HandleGrab(db_path string, arr []string) error {
 	// Create the map of arguments, only including args in acceptable_args
 	args := make(map[string]string)
-	acceptable_args := []string{"-d", "-p", "-n", "-csv"}
+	acceptable_args := []string{"-d", "-p", "-t", "-n", "-csv"}
 	for ind, val := range arr {
 		if slices.Contains(acceptable_args, val) {
 			_, already_in_map := args[val]

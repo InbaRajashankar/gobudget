@@ -49,6 +49,12 @@ func GrabFilter(db_path string, args map[string]string) (*sql.Rows, error) {
 		conditions_applied++
 	}
 
+	// filter by tag
+	tag, ok := args["-t"]
+	if ok {
+		query += " WHERE tag = '" + tag + "'"
+	}
+
 	// filter by price
 	price_range, ok := args["-p"]
 	if ok {
