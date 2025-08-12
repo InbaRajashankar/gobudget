@@ -52,10 +52,15 @@ func Grabsum(db_path string, args map[string]string) (*sql.Rows, error) {
 	// If income-only or expenses-only is specified
 	_, income_only := args["-i"]
 	_, expenses_only := args["-e"]
+	if date_between_suffix == "" && (income_only || expenses_only) {
+		query += " WHERE"
+	} else if income_only || expenses_only {
+		query += " AND"
+	}
 	if income_only {
-		query += " AND (price > 0)"
+		query += " (price > 0)"
 	} else if expenses_only {
-		query += " AND (price < 0)"
+		query += " (price < 0)"
 	}
 
 	// Groupby
