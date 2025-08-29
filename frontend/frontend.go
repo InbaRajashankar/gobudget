@@ -44,7 +44,10 @@ func InteractionLoop() {
 			fmt.Println("Goodbye...")
 			os.Exit(0)
 		case "help", "h":
-			log.Fatal("help has not been implemented yet :p")
+			err := HandleHelp()
+			if err != nil {
+				log.Println(err)
+			}
 		case "clear", "c":
 			log.Fatal("clear has not been implemented yet :p")
 		case "grab", "g":
@@ -89,6 +92,33 @@ func OpenConfig() (Config, error) {
 	}
 
 	return config, nil
+}
+
+// HandleHelp prints the command reference from the README file
+func HandleHelp() error {
+	file, err := os.Open("./README.md")
+	if err != nil {
+		return err
+	}
+
+	scanner := bufio.NewScanner(file)
+	on_command_ref := false
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if on_command_ref {
+			if strings.Contains(line, "##") {
+				on_command_ref = false
+			}
+			fmt.Println(line)
+		}
+		if strings.Contains(line, "## Command Reference") {
+			on_command_ref = true
+		}
+	}
+
+	file.Close()
+	return nil
 }
 
 // HandleGrab is the handler if the command is "grab".
