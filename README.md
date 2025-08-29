@@ -27,9 +27,11 @@ enter: enter “enter mode”
 `b`: bulk (csv plaintext)
 `c`: bulk csv file - NO HEADER COLUMN
 
-`help (h)`: print command reference
+`help/h`: print command reference
 
-`quit (q)`: quit program
+`quit/q`: quit program
+
+`setup/s`: creates a new db at the filepath specified in config.json
 
 *Note that `[RANGE]` is a range in the format `start,end` either `start` or `end` can be empty for dates. All dates are M/D/Y.*
 
