@@ -48,6 +48,11 @@ func InteractionLoop() {
 			if err != nil {
 				log.Println(err)
 			}
+		case "setup", "s":
+			err := HandleSetup(db_path)
+			if err != nil {
+				log.Println(err)
+			}
 		case "clear", "c":
 			log.Fatal("clear has not been implemented yet :p")
 		case "grab", "g":
@@ -92,6 +97,13 @@ func OpenConfig() (Config, error) {
 	}
 
 	return config, nil
+}
+
+// HandleSetup creates a .db file given a path
+func HandleSetup(db_path string) error {
+	utils.CreateTable(db_path)
+	log.Println("SQLite DB file created at ", db_path)
+	return nil
 }
 
 // HandleHelp prints the command reference from the README file
